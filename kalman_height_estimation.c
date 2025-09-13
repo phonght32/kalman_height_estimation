@@ -152,8 +152,10 @@ err_code_t kalman_height_estimation_update(kalman_height_estimation_handle_t han
 	                                      handle->W);
 
 	// K_h = (Ppri_h * C_h.t()) * S_h.inverse();
-	handle->K = CLinearAlgebra_Matrix_Multiply(CLinearAlgebra_Matrix_Multiply(handle->P, handle->C),
-	            CLinearAlgebra_Matrix_Inverse(handle->S));
+	handle->K = CLinearAlgebra_Matrix_Multiply(
+	                CLinearAlgebra_Matrix_Multiply(handle->P,
+	                        CLinearAlgebra_Matrix_Transpose(handle->C)),
+	                CLinearAlgebra_Matrix_Inverse(handle->S));
 
 	// Xpost_h = Xpri_h + (K_h * E_h);
 	handle->Xprev = CLinearAlgebra_Matrix_Add(handle->X,
