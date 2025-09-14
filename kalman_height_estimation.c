@@ -2,8 +2,8 @@
 #include "kalman_height_estimation.h"
 #include "CLinearAlgebra.h"
 
-#define STD_DEV_V_H      0.001f // process noise
-#define STD_DEV_W_H      0.01f // sensor noise
+#define STD_DEV_V_H      0.05f // process noise
+#define STD_DEV_W_H      0.3f // sensor noise
 
 typedef struct kalman_height_estimation {
 	float dt;
