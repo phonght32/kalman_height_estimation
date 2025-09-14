@@ -44,71 +44,61 @@ err_code_t kalman_height_estimation_set_config(kalman_height_estimation_handle_t
 
 err_code_t kalman_height_estimation_config(kalman_height_estimation_handle_t handle)
 {
-	handle->A.rows = 2;
-	handle->A.cols = 2;
-	clinalg_matrix_set(&handle->A, 0, 0, 1.0f);
-	clinalg_matrix_set(&handle->A, 0, 1, handle->dt);
-	clinalg_matrix_set(&handle->A, 1, 0, 0.0f);
-	clinalg_matrix_set(&handle->A, 1, 1, 1.0f);
+	handle->A = clinalg_matrix_create(2, 2, (float[]){ 
+		1.0f, handle->dt, 
+		0.0f, 1.0f 
+	});
 
-	handle->B.rows = 2;
-	handle->B.cols = 1;
-	clinalg_matrix_set(&handle->B, 0, 0, 0.5f * handle->dt * handle->dt);
-	clinalg_matrix_set(&handle->B, 1, 0, handle->dt);
+	handle->B = clinalg_matrix_create(2, 1, (float[]){
+		0.5f * handle->dt * handle->dt,
+		handle->dt
+	});
 
-	handle->C.rows = 1;
-	handle->C.cols = 2;
-	clinalg_matrix_set(&handle->C, 0, 0, 1.0f);
-	clinalg_matrix_set(&handle->C, 0, 1, 0.0f);
+	handle->C = clinalg_matrix_create(1, 2, (float[]){
+		1.0f, 0.0f
+	});
 
-	handle->V.rows = 2;
-	handle->V.cols = 2;
-	clinalg_matrix_set(&handle->V, 0, 0, STD_DEV_V_H * STD_DEV_V_H);
-	clinalg_matrix_set(&handle->V, 0, 1, 0.0f);
-	clinalg_matrix_set(&handle->V, 1, 0, 0.0f);
-	clinalg_matrix_set(&handle->V, 1, 1, STD_DEV_V_H * STD_DEV_V_H);
+	handle->V = clinalg_matrix_create(2, 2, (float[]){
+		STD_DEV_V_H * STD_DEV_V_H,  0.0f,
+		0.0f,                       STD_DEV_V_H * STD_DEV_V_H
+	});
 
-	handle->W.rows = 1;
-	handle->W.cols = 1;
-	clinalg_matrix_set(&handle->W, 0, 0, STD_DEV_W_H * STD_DEV_W_H);
+	handle->W = clinalg_matrix_create(1, 1, (float[]){
+		STD_DEV_W_H * STD_DEV_W_H
+	});
 
-	handle->X.rows = 2;
-	handle->X.cols = 1;
-	clinalg_matrix_set(&handle->X, 0, 0, 0.0f);
-	clinalg_matrix_set(&handle->X, 1, 0, 0.0f);
+	handle->X = clinalg_matrix_create(2, 1, (float[]){
+		0.0f,
+		0.0f
+	});
 
-	handle->P.rows = 2;
-	handle->P.cols = 2;
-	clinalg_matrix_set(&handle->P, 0, 0, 1.0f);
-	clinalg_matrix_set(&handle->P, 0, 1, 0.0f);
-	clinalg_matrix_set(&handle->P, 1, 0, 0.0f);
-	clinalg_matrix_set(&handle->P, 1, 1, 1.0f);
+	handle->P = clinalg_matrix_create(2, 2, (float[]){
+		1.0f, 0.0f,
+		0.0f, 1.0f
+	});
 
-	handle->Xprev.rows = 2;
-	handle->Xprev.cols = 1;
-	clinalg_matrix_set(&handle->Xprev, 0, 0, 0.0f);
-	clinalg_matrix_set(&handle->Xprev, 1, 0, 0.0f);
+	handle->Xprev = clinalg_matrix_create(2, 1, (float[]){
+		0.0f,
+		0.0f
+	});
 
-	handle->Pprev.rows = 2;
-	handle->Pprev.cols = 2;
-	clinalg_matrix_set(&handle->Pprev, 0, 0, 1.0f);
-	clinalg_matrix_set(&handle->Pprev, 0, 1, 0.0f);
-	clinalg_matrix_set(&handle->Pprev, 1, 0, 0.0f);
-	clinalg_matrix_set(&handle->Pprev, 1, 1, 1.0f);
+	handle->Pprev = clinalg_matrix_create(2, 2, (float[]){
+		1.0f, 0.0f,
+		0.0f, 1.0f
+	});
 
-	handle->U.rows = 1;
-	handle->U.cols = 1;
-	clinalg_matrix_set(&handle->U, 0, 0, 0.0f);
+	handle->U = clinalg_matrix_create(1, 1, (float[]){
+		0.0f
+	});
 
-	handle->Y.rows = 1;
-	handle->Y.cols = 1;
-	clinalg_matrix_set(&handle->Y, 0, 0, 0.0f);
+	handle->Y = clinalg_matrix_create(1, 1, (float[]){
+		0.0f
+	});
 
 	return ERR_CODE_SUCCESS;
 }
 
-err_code_t kalman_height_estimation_update(kalman_height_estimation_handle_t handle,
-        float accel_z, float height)
+err_code_t kalman_height_estimation_update(kalman_height_estimation_handle_t handle, float accel_z, float height)
 {
 	/* Check if handle structure is NULL */
 	if (handle == NULL)
@@ -116,22 +106,21 @@ err_code_t kalman_height_estimation_update(kalman_height_estimation_handle_t han
 		return ERR_CODE_NULL_PTR;
 	}
 
-	handle->E.rows = 1;
-	handle->E.cols = 1;
-	clinalg_matrix_set(&handle->E, 0, 0, 0.0f);
+	handle->E = clinalg_matrix_create(1, 1, (float[]){
+		0.0f
+	});
 
-	handle->S.rows = 1;
-	handle->S.cols = 1;
-	clinalg_matrix_set(&handle->S, 0, 0, 0.0f);
+	handle->S = clinalg_matrix_create(1, 1, (float[]){
+		0.0f
+	});
 
-	handle->K.rows = 2;
-	handle->K.cols = 1;
-	clinalg_matrix_set(&handle->K, 0, 0, 0.0f);
-	clinalg_matrix_set(&handle->K, 1, 0, 0.0f);
+	handle->K = clinalg_matrix_create(2, 1, (float[]){
+		0.0f,
+		0.0f
+	});
 
-	clinalg_matrix_set(&handle->U, 0, 0, accel_z);
-	clinalg_matrix_set(&handle->Y, 0, 0, height);
-
+	clinalg_matrix_set_member(&handle->U, 0, 0, accel_z);
+	clinalg_matrix_set_member(&handle->Y, 0, 0, height);
 
 	// X = A*Xprev + B*U
 	handle->X = clinalg_matrix_add(clinalg_matrix_multiply(handle->A, handle->Xprev),
@@ -178,7 +167,7 @@ err_code_t kalman_height_estimation_get_height(kalman_height_estimation_handle_t
 		return ERR_CODE_NULL_PTR;
 	}
 
-	*height = clinalg_matrix_get(handle->X, 0, 0);
+	*height = clinalg_matrix_get_member(handle->X, 0, 0);
 
 	return ERR_CODE_SUCCESS;
 }
